@@ -33,3 +33,9 @@ sudo make install
 2. Execute gource:
 
    ```gource --user-image-dir ./git/avatar -s 1```
+
+## Multiple repositories
+
+Run:
+
+```multi-gsource.bash root_dir```
