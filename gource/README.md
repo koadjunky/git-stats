@@ -38,4 +38,4 @@ sudo make install
 
 Run:
 
-```multi-gsource.bash root_dir```
+```multi-gource.bash root_dir```
