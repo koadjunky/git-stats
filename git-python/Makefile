@@ -1,0 +1,2 @@
+nbstripout:
+	nbstripout jupyter/*

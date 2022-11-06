@@ -3,6 +3,7 @@ import json
 import datetime
 from collections.abc import Generator
 from typing import List
+import pandas as pd
 
 from repos import walk_repos
 from users import map_user
@@ -15,30 +16,26 @@ def get_all_commits(root_path: str) -> Generator[datetime.datetime, str]:
             yield datetime.datetime.fromtimestamp(int(tstamp)), map_user(email)
 
 
-def aggregate_hours(root_path: str) -> List[int]:
-    result = [0] * (24 * 7)
+def get_all_commits_df(root_path: str) -> pd.DataFrame:
+    table = []
     for date, email in get_all_commits(root_path):
-        index = date.weekday() * 24 + date.hour
-        result[index] += 1
-    return result
+        table.append([date, email])
+    return pd.DataFrame(table, columns=['date', 'email'])
 
 
-def aggregate_to_data(aggr_hours: List[int]) -> List[List[int]]:
-    result = []
-    for hour in range(24):
-        for day in range(7):
-            result.append([hour, day, aggr_hours[day * 24 + hour]])
-    return result
+def aggregate_hours_df(df: pd.DataFrame) -> pd.DataFrame:
+    hours = df['date'].dt.hour.to_frame(name='hour')
+    weekdays = df['date'].dt.weekday.to_frame(name='weekday')
+    df = pd.concat([df, hours, weekdays], axis=1)
+    return pd.crosstab(df['weekday'], df['hour'])
 
 
-def write_to_json(data: List[List[int]]) -> None:
-    with open('commits.json', 'w') as outfile:
-        json.dump(data, outfile)
+def write_to_csv(df: pd.DataFrame, fname: str) -> None:
+    df.to_csv(fname)
 
 
 if __name__ == '__main__':
     root_path = sys.argv[1]
-    aggr_hours = aggregate_hours(root_path)
-    data_hours = aggregate_to_data(aggr_hours)
-    write_to_json(data_hours)
-
+    commits = get_all_commits_df(root_path)
+    aggr_hours = aggregate_hours_df(commits)
+    write_to_csv(aggr_hours, 'commits_heatmap.csv')
