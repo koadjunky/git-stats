@@ -1,33 +1,50 @@
+import re
 import sys
-import json
 import datetime
-from collections.abc import Generator
-from typing import List
+import logging
 import pandas as pd
-
-from repos import walk_repos
-from users import map_user
-
-
-def get_all_commits(root_path: str) -> Generator[datetime.datetime, str]:
-    for repo in walk_repos(root_path):
-        for line in repo.git.log("--format=%at %ae").split('\n'):
-            tstamp, email = line.split()
-            yield datetime.datetime.fromtimestamp(int(tstamp)), map_user(email)
+from git import Repo
+from pathlib import Path
 
 
-def get_all_commits_df(root_path: str) -> pd.DataFrame:
+header_re = re.compile("^(\d+) (\S+) (.*)$")
+numstat_re = re.compile("^(\d+)\s+(\d+)\s+(.*)$")
+binary_re = re.compile("^-\s+-\s+(.*)$")
+
+
+# TODO: Move to separate directory
+# TODO: Strip root_path from repo_dir
+def walk_repos(root_path: str):
+    root_dir = Path(root_path)
+    for git_dir in root_dir.glob('**/.git'):
+        repo_dir = git_dir.parent
+        yield repo_dir, Repo(repo_dir.resolve())
+
+
+def get_all_commits(root_dir: str) -> pd.DataFrame:
     table = []
-    for date, email in get_all_commits(root_path):
-        table.append([date, email])
-    return pd.DataFrame(table, columns=['date', 'email'])
-
-
-def aggregate_hours_df(df: pd.DataFrame) -> pd.DataFrame:
-    hours = df['date'].dt.hour.to_frame(name='hour')
-    weekdays = df['date'].dt.weekday.to_frame(name='weekday')
-    df = pd.concat([df, hours, weekdays], axis=1)
-    return pd.crosstab(df['weekday'], df['hour'])
+    for repo_dir, repo in walk_repos(root_dir):
+        for line in repo.git.log("--format=%at %ae %s", "--numstat").split('\n'):
+            if line == "":
+                continue
+            m = header_re.match(line)
+            if m is not None:
+                date = datetime.datetime.fromtimestamp(int(m.group(1)))
+                email = m.group(2)
+                subject = m.group(3)
+                continue
+            m = numstat_re.match(line)
+            if m is not None:
+                insertions = int(m.group(1) or 0)
+                deletions = int(m.group(2) or 0)
+                path = m.group(3)
+                table.append([date, email, insertions, deletions, repo_dir, path])
+                continue
+            m = binary_re.match(line)
+            if m is not None:
+                continue
+            logging.error("Unrecognized line: %s" % line)
+    return pd.DataFrame(table, columns=['date', 'email', 'ins', 'del', 'dir', 'path'])
 
 
 def write_to_csv(df: pd.DataFrame, fname: str) -> None:
@@ -36,6 +53,5 @@ def write_to_csv(df: pd.DataFrame, fname: str) -> None:
 
 if __name__ == '__main__':
     root_path = sys.argv[1]
-    commits = get_all_commits_df(root_path)
-    aggr_hours = aggregate_hours_df(commits)
-    write_to_csv(aggr_hours, 'commits_heatmap.csv')
+    commits = get_all_commits(root_path)
+    write_to_csv(commits, 'jupyter/commits.csv')

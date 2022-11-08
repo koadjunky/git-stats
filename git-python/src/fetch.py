@@ -1,8 +1,8 @@
-from repos import walk_repos
+from commits import walk_repos
 
 
 def main(root_path: str):
-    for repo in walk_repos(root_path):
+    for repo_path, repo in walk_repos(root_path):
         repo.remote().fetch()
 
 

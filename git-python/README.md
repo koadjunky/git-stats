@@ -15,12 +15,13 @@
 
    ```pip install -r requirements.txt```
 
-4. Run application
+4. Refresh repositories
 
-   ```
-   cd src
-   python commits.py <directory_holding_repos>
-   ```
+   ```make root=<repo_root_dir> fetch``` 
+
+5. Prepare data
+
+   ```make root=<repo_root_dir> data```
 
 5. Visualize in jupyter
 

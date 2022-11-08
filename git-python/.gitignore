@@ -1,2 +1,3 @@
 /.venv
+/jupyter/commits.csv
 *.pyc
