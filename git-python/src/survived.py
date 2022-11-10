@@ -25,18 +25,21 @@ class BlameFile:
     self.total += count
 
 
-def main(repo_path, fname):
+def main(repo_path):
   # Should be -CCC but it is impossible in current GitPython
   repo = Repo(repo_path)
-  bfile = BlameFile(fname)
-  for entry in repo.blame_incremental(None, fname, M=True, C=True, w=True):
-    bfile.add_blame(entry)
-  for author in bfile.authors.keys():
-    print(author, bfile.authors[author], bfile.authors[author] * 100.0 / bfile.total)
+  for entry in repo.commit().tree.traverse():
+    fname = entry.path
+    if entry.type == 'blob':
+      bfile = BlameFile(fname)
+      for entry in repo.blame_incremental(None, fname, M=True, C=True, w=True):
+        bfile.add_blame(entry)
+      for author in bfile.authors.keys():
+        print(fname, author, bfile.authors[author], bfile.authors[author] * 100.0 / bfile.total)
 
 
 
 if __name__ == '__main__':
   import sys
   logging.basicConfig(level=logging.INFO)
-  main(sys.argv[1], sys.argv[2])
+  main(sys.argv[1])
