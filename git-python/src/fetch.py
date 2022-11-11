@@ -1,4 +1,8 @@
-from commits import walk_repos
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.resolve()))
+
+from walk import walk_repos
 
 
 def main(root_path: str):

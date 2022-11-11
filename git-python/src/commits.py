@@ -1,24 +1,18 @@
-import re
 import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.resolve()))
+
+import re
 import datetime
 import logging
 import pandas as pd
-from git import Repo
-from pathlib import Path
+
+from walk import walk_repos
 
 
 header_re = re.compile("^(\d+) (\S+) (.*)$")
 numstat_re = re.compile("^(\d+)\s+(\d+)\s+(.*)$")
 binary_re = re.compile("^-\s+-\s+(.*)$")
-
-
-# TODO: Move to separate directory
-def walk_repos(root_path: str):
-    root_dir = Path(root_path)
-    for git_dir in root_dir.glob('**/.git'):
-        repo_dir = git_dir.parent.resolve()
-        rel_dir = str(repo_dir).removeprefix(root_path)
-        yield rel_dir, Repo(repo_dir)
 
 
 def get_all_commits(root_dir: str) -> pd.DataFrame:
