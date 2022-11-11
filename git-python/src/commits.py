@@ -13,12 +13,12 @@ binary_re = re.compile("^-\s+-\s+(.*)$")
 
 
 # TODO: Move to separate directory
-# TODO: Strip root_path from repo_dir
 def walk_repos(root_path: str):
     root_dir = Path(root_path)
     for git_dir in root_dir.glob('**/.git'):
-        repo_dir = git_dir.parent
-        yield repo_dir, Repo(repo_dir.resolve())
+        repo_dir = git_dir.parent.resolve()
+        rel_dir = str(repo_dir).removeprefix(root_path)
+        yield rel_dir, Repo(repo_dir)
 
 
 def get_all_commits(root_dir: str) -> pd.DataFrame:
