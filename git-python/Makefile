@@ -8,3 +8,6 @@ fetch:
 
 data:
 	python src/commits.py $(root)
+
+survived:
+	python src/survived.py $(root)

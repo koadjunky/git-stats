@@ -1,4 +1,4 @@
 /.venv
-/jupyter/commits.csv
+/jupyter/*.csv
 /src/private.py
 *.pyc
