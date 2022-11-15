@@ -39,8 +39,8 @@ def survived_in_repo(repo_dir:str, repo: Repo) -> List[List[Union[str, int]]]:
             bfile = BlameFile(fpath)
             for entry in repo.blame_incremental(None, fpath, M=True, C=True, w=True):
                 bfile.add_blame(entry)
-                for author in bfile.authors.keys():
-                    table.append([repo_dir, fpath, author, bfile.authors[author], bfile.total])
+            for author in bfile.authors.keys():
+                table.append([repo_dir, fpath, author, bfile.authors[author], bfile.total])
     return table
 
 
