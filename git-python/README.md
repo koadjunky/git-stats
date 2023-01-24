@@ -21,7 +21,7 @@
 
 5. Prepare data
 
-   ```make root=<repo_root_dir> data```
+   ```make root=<repo_root_dir> data survived```
 
 5. Visualize in jupyter
 
