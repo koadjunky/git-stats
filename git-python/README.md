@@ -17,13 +17,17 @@
 
 4. Refresh repositories
 
-   ```make root=<repo_root_dir> fetch``` 
+   ```make root=<repo_root_dir> pull``` 
 
 5. Prepare data
 
-   ```make root=<repo_root_dir> data survived```
+   ```make root=<repo_root_dir> prefix=<gitlab group> commits survived```
 
-5. Visualize in jupyter
+6. Merge data
+
+   ```make merge-commits```
+
+7. Visualize in jupyter
 
    ```jupyter/commits_heatmap.ipynb```
 

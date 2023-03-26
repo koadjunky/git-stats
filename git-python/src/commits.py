@@ -15,7 +15,7 @@ numstat_re = re.compile("^(\d+)\s+(\d+)\s+(.*)$")
 binary_re = re.compile("^-\s+-\s+(.*)$")
 
 
-def get_all_commits(root_dir: str) -> pd.DataFrame:
+def get_all_commits(root_dir: str, prefix: str) -> pd.DataFrame:
     table = []
     for repo_dir, repo in walk_repos(root_dir):
         for line in repo.git.log("--format=%at %ae %s", "--numstat").split('\n'):
@@ -32,7 +32,7 @@ def get_all_commits(root_dir: str) -> pd.DataFrame:
                 insertions = int(m.group(1) or 0)
                 deletions = int(m.group(2) or 0)
                 path = m.group(3)
-                table.append([date, email, insertions, deletions, repo_dir, path])
+                table.append([date, email, insertions, deletions, prefix + repo_dir, path])
                 continue
             m = binary_re.match(line)
             if m is not None:
@@ -47,5 +47,6 @@ def write_to_csv(df: pd.DataFrame, fname: str) -> None:
 
 if __name__ == '__main__':
     root_path = sys.argv[1]
-    commits = get_all_commits(root_path)
-    write_to_csv(commits, 'jupyter/commits.csv')
+    prefix = sys.argv[2]
+    commits = get_all_commits(root_path, prefix)
+    write_to_csv(commits, f'jupyter/commits-{prefix}.csv')

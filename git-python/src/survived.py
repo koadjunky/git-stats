@@ -44,14 +44,16 @@ def survived_in_repo(repo_dir:str, repo: Repo) -> List[List[Union[str, int]]]:
     return table
 
 
-def main(root_dir: str) -> pd.DataFrame:
+def main(root_dir: str, prefix: str) -> pd.DataFrame:
     table = []
     for repo_dir, repo in walk_repos(root_dir):
-        table.extend(survived_in_repo(repo_dir, repo))
+        table.extend(survived_in_repo(prefix + repo_dir, repo))
     return pd.DataFrame(table, columns=['dir', 'path', 'email', 'survived', 'total'])
 
 
 if __name__ == '__main__':
     import sys
-    df = main(sys.argv[1])
-    df.to_csv('jupyter/survived.csv')
+    root_dir = sys.argv[1]
+    prefix = sys.argv[2]
+    df = main(root_dir, prefix)
+    df.to_csv(f'jupyter/survived-{prefix}.csv')
