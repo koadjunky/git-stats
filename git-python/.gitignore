@@ -2,3 +2,4 @@
 /jupyter/*.csv
 /src/private.py
 *.pyc
+.ipynb_checkpoints
