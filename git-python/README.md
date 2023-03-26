@@ -32,3 +32,13 @@
 1. Run nbstripout on jupyters
 
    ```make nbstripout```
+
+# Tools
+
+Clone all repositories from GitLab:
+
+```
+python src/create_clone_script.py > run.bash
+chmod u+x run.bash
+./run.bash
+```
